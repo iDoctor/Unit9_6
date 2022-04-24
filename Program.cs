@@ -1,4 +1,7 @@
-﻿List<Exception> exceptionsList = new List<Exception> ()
+﻿// Задание 1
+using System.Text.RegularExpressions;
+
+List<Exception> exceptionsList = new List<Exception> ()
 {
     new NotImplementedException (),
     new DivideByZeroException (),
@@ -46,19 +49,44 @@ foreach (Exception ex in exceptionsList)
     }
 }
 
-Student newStudent = null;
+Helper helper = new Helper();
+Student newStudent = new Student();
 try
 {
-    newStudent = new Student();
-    newStudent.StudentName = "James007";
+    newStudent.StudentName = "Иван007";
 
-    if (newStudent.StudentID == 0)
-        throw new InvalidStudentNameException(newStudent.StudentName);
+    helper.ValidateStudent(newStudent);
 }
 catch (InvalidStudentNameException ex)
 {
     Console.WriteLine(ex.Message);
 }
+
+
+
+// Задание 2
+List<string> studentsList = new List<string> ()
+{
+    "Иванов",
+    "Петров001",
+    "Никитин",
+    "Ярославов",
+    "Авдотьев"
+};
+
+MyEvent evt = new MyEvent();
+
+// Добавляем обработчик события
+evt.UserEvent += helper.OrderStudents;
+
+// Запустим событие
+evt.OnUserEvent();
+
+Console.WriteLine($"{Environment.NewLine}Введите 1(2) для выбора типа сортировки:");
+
+
+
+
 
 class Student
 {
@@ -72,8 +100,52 @@ class InvalidStudentNameException : Exception
     public InvalidStudentNameException() { }
 
     public InvalidStudentNameException(string name)
-        : base(String.Format("Некорректный ID у студента: {0}", name))
+        : base(String.Format("Некорректное имя у студента: {0}", name))
     {
 
+    }
+}
+
+class Helper
+{
+    public void ValidateStudent(Student std)
+    {
+        Regex regex = new Regex("^[а-яА-Я]+$");
+
+        if (!regex.IsMatch(std.StudentName))
+            throw new InvalidStudentNameException(std.StudentName);
+    }
+
+    // Обработчик события
+    public void OrderStudents()
+    {
+        List<string> newList = new List<string>();
+        try
+        {
+            // Проблемы с работой event + метод с параметрами и return
+            // Должно быть:
+            // public List<string> OrderStudents(List<string> itemsList, int orderSide)
+            newList = newList.OrderBy(x => x).ToList();
+        }
+        catch (Exception ex)
+        {
+
+        }
+    }
+}
+
+
+
+delegate void UI();
+
+class MyEvent
+{
+    // Объявляем событие
+    public event UI UserEvent;
+
+    // Используем метод для запуска события
+    public void OnUserEvent()
+    {
+        UserEvent();
     }
 }
